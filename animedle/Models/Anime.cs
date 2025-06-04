@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -10,6 +11,7 @@ public class Anime
     public string? Id { get; set; }
 
     [BsonElement("Name")]
+    [JsonPropertyName("Name")]
     public string AnimeName { get; set; } = null!;
 
     public string MainGenre { get; set; } = null!;
