@@ -1,72 +1,56 @@
 using animedle.Models;
-using animedle.Services;
+using animedle.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace animedle.Controllers;
 
 [ApiController]
-[Route("animes/[controller]")]
+[Route("api/[controller]")]
 public class AnimesController : ControllerBase
 {
-    private readonly AnimeService _animeService;
+    private readonly IAnimeService _animeService;
 
-    public AnimesController(AnimeService animeService) =>
+    public AnimesController(IAnimeService animeService) =>
         _animeService = animeService;
 
     [HttpGet]
-    public async Task<List<Anime>> Get() =>
-        await _animeService.GetAsync();
+    public async Task<ActionResult<List<Anime>>> GetAll() =>
+        Ok(await _animeService.GetAllAsync());
 
     [HttpGet("{id:length(24)}")]
-    public async Task<ActionResult<Anime>> Get(string id)
+    public async Task<ActionResult<Anime>> GetById(string id)
     {
-        var anime = await _animeService.GetAsync(id);
-
-        if (anime is null)
-        {
-            return NotFound();
-        }
-
-        return anime;
+        var anime = await _animeService.GetByIdAsync(id);
+        return anime is null ? NotFound() : Ok(anime);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post(Anime newAnime)
+    public async Task<ActionResult<Anime>> Create(Anime newAnime)
     {
         await _animeService.CreateAsync(newAnime);
-
-        return CreatedAtAction(nameof(Get), new { id = newAnime.Id }, newAnime);
+        return CreatedAtAction(nameof(GetById), new { id = newAnime.Id }, newAnime);
     }
 
     [HttpPut("{id:length(24)}")]
     public async Task<IActionResult> Update(string id, Anime updatedAnime)
     {
-        var anime = await _animeService.GetAsync(id);
-
-        if (anime is null)
-        {
+        var exists = await _animeService.CheckIfExistsAsync(id);
+        if (!exists)
             return NotFound();
-        }
 
-        updatedAnime.Id = anime.Id;
-
+        updatedAnime.Id = id;
         await _animeService.UpdateAsync(id, updatedAnime);
-
         return NoContent();
     }
 
     [HttpDelete("{id:length(24)}")]
     public async Task<IActionResult> Delete(string id)
     {
-        var anime = await _animeService.GetAsync(id);
-
-        if (anime is null)
-        {
+        var exists = await _animeService.CheckIfExistsAsync(id);
+        if (!exists)
             return NotFound();
-        }
 
         await _animeService.RemoveAsync(id);
-
         return NoContent();
     }
 }

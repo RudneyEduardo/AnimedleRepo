@@ -1,24 +1,31 @@
 using animedle.Models;
 using animedle.Services;
+using animedle.Services.Interfaces;
+using animedle.Repositories;
+using animedle.Repositories.Interfaces; 
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuração do MongoDB
 builder.Services.Configure<AnimeDbSettings>(
-    builder.Configuration.GetSection("animedle"));
+    builder.Configuration.GetSection("AnimeDb"));
 
-builder.Services.AddSingleton<AnimeService>();
+// Registro do repositório e service
+builder.Services.AddScoped<IAnimeRepository, AnimeRepository>();
+builder.Services.AddScoped<IAnimeService, AnimeService>();
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+// Configuração do Swagger e Controllers
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
-builder.Services.AddControllers().
-        AddJsonOptions(
-            options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.PropertyNamingPolicy = null);
 
+// Build da aplicação
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Pipeline de desenvolvimento
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -26,11 +33,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// CORS e static files
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.MapControllers();
+app.UseCors(builder =>
+    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
-// Disable CORS since angular will be running on port 4200 and the service on port 5258.
-app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+app.MapControllers();
 
 app.Run();

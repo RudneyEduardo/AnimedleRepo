@@ -10,15 +10,27 @@ public class Anime
     [BsonRepresentation(BsonType.ObjectId)]
     public string? Id { get; set; }
 
-    [BsonElement("Name")]
-    [JsonPropertyName("Name")]
+    [BsonElement("name")]
     public string AnimeName { get; set; } = null!;
 
-    public string MainGenre { get; set; } = null!;
+    [BsonElement("status")]
+    public string Status { get; set; } = null!;
 
-    public string SecondaryGenre { get; set; } = null!;
+    [BsonElement("season")]
+    public string Season { get; set; } = null!;
 
-    public string Studio { get; set; } = null!;
+    [BsonElement("releaseDate")]
+    public string ReleaseDate { get; set; } = null!;
 
-    public int Rating { get; set; }
+    [BsonElement("score")]
+    public double Score { get; set; }
+
+    [BsonElement("genres")]
+    public required List<string> Genres { get; set; }
+
+    [BsonElement("producers")]
+    public required List<string> Producers { get; set; }
+
+    [BsonElement("studios")]
+    public required List<string> Studios { get; set; }
 }
